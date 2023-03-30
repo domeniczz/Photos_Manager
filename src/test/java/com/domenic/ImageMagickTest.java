@@ -2,6 +2,7 @@ package com.domenic;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.domenic.beans.Dimensions;
 import com.domenic.conditions.EnabledIfImageMagickIsAvailable;
@@ -47,7 +48,7 @@ class ImageMagickTest {
      */
     @Test
     @EnabledIfImageMagickIsAvailable
-    void single_thumbnail_convertion(/* @TempDir */ Path testDir) throws IOException {
+    void single_thumbnail_convertion(@TempDir Path testDir) throws IOException {
         // copy test image to test dir, with file name test.jpg
         Path originalImage = copyTestImageTo(testDir.resolve("test.jpg"));
         // store thumbnail to test dir, with file name thumbnail.jpg
@@ -123,10 +124,21 @@ class ImageMagickTest {
         // test image directory
         String sourceDir = tmp.substring(0, tmp.lastIndexOf("/"));
 
+        convertImages(Path.of(sourceDir));
+    }
+
+    /**
+     * Convert images to thumbnails and put them into a directory
+     * 
+     * @param testDir test image directory
+     */
+    private void convertImages(@TempDir Path testDir) throws IOException, InterruptedException {
+        SoftAssertions softly = new SoftAssertions();
+
         AtomicInteger counter = new AtomicInteger();
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-        try (Stream<Path> filesStream = Files.walk(Path.of(sourceDir))) {
+        try (Stream<Path> filesStream = Files.walk(testDir)) {
 
             Stream<Path> imgStream = filesStream
                     .filter(Files::isRegularFile)
@@ -134,11 +146,16 @@ class ImageMagickTest {
 
             imgStream.forEach(file -> {
                 executor.submit(() -> {
-                    Path thumbnailPath = Main.getThumbnailPath(file);
+                    Path thumbnailPath = getThumbnailPath(file, testDir);
 
                     boolean isSuccess = new ImageMagick().createThumbnail(file, thumbnailPath);
                     if (isSuccess)
                         counter.incrementAndGet();
+
+                    softly.assertThat(thumbnailPath).exists();
+                    softly.assertThat(thumbnailPath).isNotEmptyFile();
+                    softly.assertThat(getDimensions(thumbnailPath).getWidth()).isEqualTo(300);
+                    softly.assertAll();
                 });
             });
         }
@@ -146,6 +163,33 @@ class ImageMagickTest {
         executor.shutdown();
         executor.awaitTermination(1, TimeUnit.HOURS);
         System.out.println("\nSuccessfully convert " + counter + " images to thumbnails.");
+    }
+
+    /**
+     * Resolve the path where the thumbnails will be stored
+     * 
+     * @param file
+     * @param thumbnailsDir the directory that stores thumbnails
+     * @return path + thumbnailFileName (.webp)
+     */
+    private static Path getThumbnailPath(Path file, Path thumbnailsDir) {
+        // get the hash of the file
+        String hash = FileUtil.fileToHash(file);
+        // take first 2 characters of the hash as the folder name
+        String dir = hash.substring(0, 2);
+        // take the rest characters as the file name
+        String filename = hash.substring(2);
+
+        // resolve and get the path
+        Path thumbnailDir = thumbnailsDir.resolve(dir);
+        if (!Files.exists(thumbnailDir)) {
+            try {
+                Files.createDirectories(thumbnailDir);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return thumbnailDir.resolve(filename + ".webp");
     }
 
 }
