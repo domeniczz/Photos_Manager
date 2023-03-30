@@ -63,7 +63,9 @@ public class ImageMagick {
                 process.destroy();
             }
 
+            System.out.print(Thread.currentThread().getName() + " ");
             System.out.println("---- " + src.substring(src.lastIndexOf('\\') + 1) + "'s thumbnail created! ----");
+            System.out.println("target dir: " + tar + "\n");
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
