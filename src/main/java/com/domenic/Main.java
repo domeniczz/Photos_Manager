@@ -17,6 +17,7 @@ import com.domenic.utils.FileUtil;
 public class Main {
 
     private static final String userHome = System.getProperty("user.home");
+    // the directory that stores thumbnails
     private static final Path thumbnailsDir = Path.of(userHome).resolve(".photos");
 
     public static void main(String[] args) throws Exception {
@@ -82,9 +83,9 @@ public class Main {
      * Resolve the path where the thumbnails will be stored
      * 
      * @param file image file
-     * @return
+     * @return path + thumbnailFileName (.webp)
      */
-    protected static Path getThumbnailPath(Path file) {
+    private static Path getThumbnailPath(Path file) {
         // get the hash of the file
         String hash = FileUtil.fileToHash(file);
         // take first 2 characters of the hash as the folder name
