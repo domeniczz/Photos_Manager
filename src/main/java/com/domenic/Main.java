@@ -1,11 +1,8 @@
 package com.domenic;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -13,8 +10,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import com.domenic.utils.FileUtil;
-
-import io.github.rctcwyvrn.blake3.Blake3;
 
 /**
  * Hello world!
@@ -26,6 +21,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
+        // create the directory that stores the thumbnails
         if (!Files.exists(thumbnailsDir))
             Files.createDirectories(thumbnailsDir);
 
@@ -33,6 +29,7 @@ public class Main {
         String directory = args.length == 1 ? args[0] : ".";
         Path sourceDir = Path.of(directory);
 
+        // implement convertion
         convertToThumbnails(sourceDir);
     }
 
@@ -43,11 +40,12 @@ public class Main {
      * @throws Exception
      */
     private static void convertToThumbnails(final Path sourceDir) throws Exception {
+
+        ImageMagick imageMagick = new ImageMagick();
+
         // count images & record excute time
         AtomicInteger counter = new AtomicInteger();
         long start = System.currentTimeMillis();
-
-        ImageMagick imageMagick = new ImageMagick();
 
         // Get thread pool
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -65,8 +63,9 @@ public class Main {
                 executor.submit(() -> {
                     Path thumbnailPath = getThumbnailPath(file);
 
-                    imageMagick.createThumbnail(file, thumbnailPath);
-                    counter.incrementAndGet();
+                    boolean isSuccess = imageMagick.createThumbnail(file, thumbnailPath);
+                    if (isSuccess)
+                        counter.incrementAndGet();
                 });
             });
 
@@ -80,12 +79,12 @@ public class Main {
     }
 
     /**
-     * Resolve the path where the image will be stored
+     * Resolve the path where the thumbnails will be stored
      * 
      * @param file image file
      * @return
      */
-    private static Path getThumbnailPath(Path file) {
+    protected static Path getThumbnailPath(Path file) {
         // get the hash of the file
         String hash = FileUtil.fileToHash(file);
         // take first 2 characters of the hash as the folder name

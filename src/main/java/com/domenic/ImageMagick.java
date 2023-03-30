@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Domenic
  * @Classname ImageMagic
- * @Description TODO
+ * @Description 
  * @Date 3/24/2023 9:03 PM
  * @Created by Domenic
  */
@@ -45,7 +45,7 @@ public class ImageMagick {
         }
     }
 
-    public void createThumbnail(Path source, Path target) {
+    public boolean createThumbnail(Path source, Path target) {
         try {
             // normalize and get absolute path, in case the path contains weird characters
             String src = source.normalize().toAbsolutePath().toString();
@@ -66,8 +66,11 @@ public class ImageMagick {
             System.out.print(Thread.currentThread().getName() + " ");
             System.out.println("---- " + src.substring(src.lastIndexOf('\\') + 1) + "'s thumbnail created! ----");
             System.out.println("target dir: " + tar + "\n");
+
+            return true;
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+            return false;
         }
     }
 

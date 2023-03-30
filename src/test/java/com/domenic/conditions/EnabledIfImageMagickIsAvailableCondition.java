@@ -1,15 +1,17 @@
-package com.domenic;
+package com.domenic.conditions;
 
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
+
+import com.domenic.ImageMagick;
 
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 
 /**
  * @author Domenic
  * @Classname EnabledIfImageMagickAvailableCondition
- * @Description TODO
+ * @Description 
  * @Date 3/24/2023 9:41 PM
  * @Created by Domenic
  */

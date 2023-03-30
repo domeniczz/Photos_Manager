@@ -1,4 +1,4 @@
-package com.domenic;
+package com.domenic.conditions;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 /**
  * @author Domenic
  * @Classname EnabledIfImageMagickAvailable
- * @Description TODO
+ * @Description 
  * @Date 3/24/2023 9:27 PM
  * @Created by Domenic
  */

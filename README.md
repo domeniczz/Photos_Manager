@@ -11,6 +11,11 @@ Do some image management stuff
 - multi-thread
 - test based development
 
+## Environment
+
+- Java 17
+- Maven 3.8.6 (Maven wrapper)
+
 ## Dependencies
 
 - JUnit 5
